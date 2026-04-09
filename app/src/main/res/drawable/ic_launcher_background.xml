@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:pathData="M0,0h108v108h-108z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="108"
+                android:endY="108"
+                android:startX="0"
+                android:startY="0"
+                android:type="linear">
+                <item
+                    android:color="#004D40"
+                    android:offset="0.0" />
+                <item
+                    android:color="#00251A"
+                    android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+    <!-- Subtle financial upward trend line representing growth/tracking -->
+    <path
+        android:fillColor="#0FFFFFFF"
+        android:pathData="M0,85 L30,65 L55,75 L85,45 L108,55 L108,108 L0,108 Z" />
+    <path
+        android:fillColor="#00000000"
+        android:pathData="M0,85 L30,65 L55,75 L85,45 L108,55"
+        android:strokeWidth="1"
+        android:strokeColor="#20FFFFFF" />
+</vector>

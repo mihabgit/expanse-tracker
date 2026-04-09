@@ -1,0 +1,74 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Shadow for the Wallet -->
+    <path
+        android:fillColor="#26000000"
+        android:pathData="M26,38h56c4.4,0 8,3.6 8,8v32c0,4.4 -3.6,8 -8,8h-56c-4.4,0 -8,-3.6 -8,-8v-32c0,-4.4 3.6,-8 8,-8z" />
+
+    <!-- Wallet Body -->
+    <path android:pathData="M24,36h56c4.4,0 8,3.6 8,8v32c0,4.4 -3.6,8 -8,8h-56c-4.4,0 -8,-3.6 -8,-8v-32c0,-4.4 3.6,-8 8,-8z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="88"
+                android:endY="84"
+                android:startX="24"
+                android:startY="36"
+                android:type="linear">
+                <item android:color="#455A64" android:offset="0.0" />
+                <item android:color="#263238" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Wallet Flap with Stitching Effect -->
+    <path android:pathData="M88,48h-18c-3.3,0 -6,2.7 -6,6v12c0,3.3 2.7,6 6,6h18c3.3,0 6,-2.7 6,-6v-12c0,-3.3 -2.7,-6 -6,-6z">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="94"
+                android:endY="72"
+                android:startX="64"
+                android:startY="48"
+                android:type="linear">
+                <item android:color="#546E7A" android:offset="0.0" />
+                <item android:color="#37474F" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Flap Button (Silver/Metallic) -->
+    <path android:pathData="M74,60m-3,0a3,3 0,1 1,6 0a3,3 0,1 1,-6 0">
+        <aapt:attr name="android:fillColor">
+            <gradient
+                android:endX="77"
+                android:endY="63"
+                android:startX="71"
+                android:startY="57"
+                android:type="linear">
+                <item android:color="#CFD8DC" android:offset="0.0" />
+                <item android:color="#90A4AE" android:offset="1.0" />
+            </gradient>
+        </aapt:attr>
+    </path>
+
+    <!-- Dollar Sign ($) - Vivid Gold -->
+    <path
+        android:fillColor="#FFD600"
+        android:pathData="M38,44h2v1.5h4v2h-4v4h4c1.1,0 2,0.9 2,2v4c0,1.1 -0.9,2 -2,2h-4v1.5h-2v-1.5h-4v-2h4v-4h-4c-1.1,0 -2,-0.9 -2,-2v-4c0,-1.1 0.9,-2 2,-2h4v-1.5zM38,51.5v4h4v-4h-4zM38,61v4h4v-4h-4z" />
+
+    <!-- Taka Sign (৳) - Vivid Gold -->
+    <!-- Simplified but recognizable Bengali Taka -->
+    <path
+        android:fillColor="#FFD600"
+        android:pathData="M52,48h14v2.5h-14zM56,44h3v12h-3zM52,58h10v2h-10c-2,0 -4,2 -4,4s2,4 4,4h6v-2h-6c-1,0 -2,-1 -2,-2s1,-2 2,-2h10v-10h-10z" />
+
+    <!-- Glossy reflection on top of wallet -->
+    <path
+        android:fillColor="#1AFFFFFF"
+        android:pathData="M24,36h56c4.4,0 8,3.6 8,8v8l-72,16v-24c0,-4.4 3.6,-8 8,-8z" />
+
+</vector>
