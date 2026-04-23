@@ -33,8 +33,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-data class QuickExpense(val icon: String, val category: String, val categoryBn: String, val amount: Double, val color: Color)
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
@@ -42,23 +40,17 @@ fun HomeScreen(
     onAddClick: () -> Unit,
     onSeeAllClick: () -> Unit,
     onSummaryClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onManageQuickClick: () -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val currency = LocaleHelper.getCurrency(context)
     val todayTotal by viewModel.todayTotal.collectAsState()
     val recentExpenses by viewModel.recentExpenses.collectAsState()
     val todayCount by viewModel.todayCount.collectAsState()
+    val quickExpenses by viewModel.quickExpenses.collectAsState()
 
     val isBengali = Locale.getDefault().language == "bn"
-
-    val quickExpenses = listOf(
-        QuickExpense("☕", "Coffee", "কফি", 100.0, Color(0xFF795548)),
-        QuickExpense("🚌", "Bus Fare", "বাস ভাড়া", 30.0, Color(0xFF2196F3)),
-        QuickExpense("🍔", "Lunch", "দুপুরের খাবার", 250.0, Color(0xFFFF9800)),
-        QuickExpense("🍿", "Snacks", "নাস্তা", 50.0, Color(0xFFE91E63)),
-        QuickExpense("🛒", "Grocery", "মুদি খরচ", 500.0, Color(0xFF4CAF50))
-    )
 
     Scaffold(
         topBar = {
@@ -184,10 +176,19 @@ fun HomeScreen(
             // Quick Add Section ⚡
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    Text(
-                        if (isBengali) "দ্রুত যোগ করুন" else "Quick Add",
-                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
-                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            if (isBengali) "দ্রুত যোগ করুন" else "Quick Add",
+                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
+                        )
+                        TextButton(onClick = onManageQuickClick) {
+                            Text(if (isBengali) "সম্পাদনা" else "Edit", color = MaterialTheme.colorScheme.primary)
+                        }
+                    }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -219,12 +220,13 @@ fun HomeScreen(
 
                         // Predefined Expenses
                         quickExpenses.forEach { quick ->
+                            val quickColor = Color(quick.color)
                             Card(
                                 onClick = { viewModel.addExpense(quick.amount, quick.category, "Quick add") },
                                 modifier = Modifier.size(width = 95.dp, height = 100.dp),
                                 shape = RoundedCornerShape(20.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = quick.color.copy(alpha = 0.1f)
+                                    containerColor = quickColor.copy(alpha = 0.1f)
                                 )
                             ) {
                                 Column(
@@ -240,14 +242,14 @@ fun HomeScreen(
                                         if (isBengali) quick.categoryBn else quick.category,
                                         style = MaterialTheme.typography.labelSmall,
                                         fontWeight = FontWeight.Bold,
-                                        color = quick.color,
+                                        color = quickColor,
                                         maxLines = 1,
                                         textAlign = TextAlign.Center
                                     )
                                     Text(
                                         "$currency${quick.amount.toInt()}",
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = quick.color.copy(alpha = 0.8f)
+                                        color = quickColor.copy(alpha = 0.8f)
                                     )
                                 }
                             }

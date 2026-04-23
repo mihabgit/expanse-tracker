@@ -14,6 +14,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -28,6 +29,8 @@ import androidx.compose.ui.unit.sp
 import com.mihab.expensetracker.data.local.ExpenseEntity
 import com.mihab.expensetracker.util.LocaleHelper
 import com.mihab.expensetracker.viewmodel.ExpenseViewModel
+import java.text.SimpleDateFormat
+import java.util.Date
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,7 +38,7 @@ import java.util.Locale
 fun AddExpenseScreen(
     expenseId: Int? = null,
     viewModel: ExpenseViewModel? = null,
-    onSave: (Double, String, String?) -> Unit,
+    onSave: (Double, String, String?, Long) -> Unit,
     onUpdate: (ExpenseEntity) -> Unit,
     onBackClick: () -> Unit
 ) {
@@ -44,6 +47,8 @@ fun AddExpenseScreen(
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
     var selectedCategory by remember { mutableStateOf("Food") }
+    var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    var showDatePicker by remember { mutableStateOf(false) }
     var showCustomCategoryDialog by remember { mutableStateOf(false) }
     var customCategoryName by remember { mutableStateOf("") }
     var existingExpense by remember { mutableStateOf<ExpenseEntity?>(null) }
@@ -58,6 +63,7 @@ fun AddExpenseScreen(
                 amount = expense.amount.toString()
                 note = expense.note ?: ""
                 selectedCategory = expense.category
+                selectedDate = expense.date
             }
         }
     }
@@ -254,6 +260,56 @@ fun AddExpenseScreen(
                 )
             )
 
+            // Date Selection
+            Box(modifier = Modifier.fillMaxWidth()) {
+                OutlinedTextField(
+                    value = SimpleDateFormat("dd MMM, yyyy", Locale.getDefault()).format(Date(selectedDate)),
+                    onValueChange = { },
+                    label = { Text(if (isBengali) "তারিখ (ঐচ্ছিক)" else "Date (optional)") },
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    leadingIcon = { Icon(Icons.Default.DateRange, contentDescription = null) },
+                    readOnly = true,
+                    enabled = true,
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = MaterialTheme.colorScheme.primary,
+                        unfocusedBorderColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                )
+                // Transparent clickable overlay to trigger date picker
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clickable { showDatePicker = true }
+                )
+            }
+
+            if (showDatePicker) {
+                val datePickerState = rememberDatePickerState(initialSelectedDateMillis = selectedDate)
+                DatePickerDialog(
+                    onDismissRequest = { showDatePicker = false },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                datePickerState.selectedDateMillis?.let {
+                                    selectedDate = it
+                                }
+                                showDatePicker = false
+                            }
+                        ) {
+                            Text(if (isBengali) "ঠিক আছে" else "OK")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDatePicker = false }) {
+                            Text(if (isBengali) "বাতিল" else "Cancel")
+                        }
+                    }
+                ) {
+                    DatePicker(state = datePickerState)
+                }
+            }
+
             Spacer(modifier = Modifier.height(24.dp))
 
             // Save Button
@@ -265,10 +321,11 @@ fun AddExpenseScreen(
                             onUpdate(existingExpense!!.copy(
                                 amount = parsedAmount,
                                 category = selectedCategory,
-                                note = note.ifBlank { null }
+                                note = note.ifBlank { null },
+                                date = selectedDate
                             ))
                         } else {
-                            onSave(parsedAmount, selectedCategory, note.ifBlank { null })
+                            onSave(parsedAmount, selectedCategory, note.ifBlank { null }, selectedDate)
                         }
                     }
                 },

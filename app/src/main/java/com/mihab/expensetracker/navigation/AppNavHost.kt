@@ -8,6 +8,8 @@ import com.mihab.expensetracker.data.local.ExpenseEntity
 import com.mihab.expensetracker.ui.screens.AddExpenseScreen
 import com.mihab.expensetracker.ui.screens.ExpenseListScreen
 import com.mihab.expensetracker.ui.screens.HomeScreen
+import com.mihab.expensetracker.ui.screens.ManageQuickExpensesScreen
+import com.mihab.expensetracker.ui.screens.OnboardingScreen
 import com.mihab.expensetracker.ui.screens.Screen
 import com.mihab.expensetracker.ui.screens.SettingsScreen
 import com.mihab.expensetracker.ui.screens.SummaryScreen
@@ -17,12 +19,20 @@ import com.mihab.expensetracker.viewmodel.ExpenseViewModel
 fun AppNavHost(
     navController: NavHostController,
     viewModel: ExpenseViewModel,
-    onLanguageChanged: () -> Unit
+    startDestination: String = Screen.Home.route,
+    onLanguageChanged: () -> Unit,
+    onOnboardingFinished: () -> Unit = {}
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = startDestination
     ) {
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onFinished = onOnboardingFinished,
+                showSkip = startDestination != Screen.Onboarding.route
+            )
+        }
         composable(Screen.Home.route) {
             HomeScreen(
                 viewModel = viewModel,
@@ -37,6 +47,9 @@ fun AppNavHost(
                 },
                 onSettingsClick = {
                     navController.navigate(Screen.Settings.route)
+                },
+                onManageQuickClick = {
+                    navController.navigate(Screen.ManageQuickExpenses.route)
                 }
             )
         }
@@ -47,7 +60,22 @@ fun AppNavHost(
                     navController.popBackStack()
                 },
                 onLanguageChanged = onLanguageChanged,
-                onCurrencyChanged = onLanguageChanged // reusing language change trigger for refreshing UI
+                onCurrencyChanged = onLanguageChanged, // reusing language change trigger for refreshing UI
+                onManageQuickExpensesClick = {
+                    navController.navigate(Screen.ManageQuickExpenses.route)
+                },
+                onTutorialClick = {
+                    navController.navigate(Screen.Onboarding.route)
+                }
+            )
+        }
+
+        composable(Screen.ManageQuickExpenses.route) {
+            ManageQuickExpensesScreen(
+                viewModel = viewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -88,8 +116,8 @@ fun AppNavHost(
             AddExpenseScreen(
                 expenseId = if (expenseId != -1) expenseId else null,
                 viewModel = viewModel,
-                onSave = { amount, category, note ->
-                    viewModel.addExpense(amount, category, note)
+                onSave = { amount, category, note, date ->
+                    viewModel.addExpense(amount, category, note, date)
                     navController.popBackStack()
                 },
                 onUpdate = { expense: ExpenseEntity ->

@@ -32,4 +32,19 @@ class ExpenseRepository(private val dao: ExpenseDao) {
 
     suspend fun getExpenseById(id: Int) =
         dao.getExpenseById(id)
+
+    fun getAllQuickExpenses(): Flow<List<com.mihab.expensetracker.data.local.QuickExpenseEntity>> =
+        dao.getAllQuickExpenses()
+
+    suspend fun insertQuickExpense(quickExpense: com.mihab.expensetracker.data.local.QuickExpenseEntity) =
+        dao.insertQuickExpense(quickExpense)
+
+    suspend fun updateQuickExpense(quickExpense: com.mihab.expensetracker.data.local.QuickExpenseEntity) =
+        dao.updateQuickExpense(quickExpense)
+
+    suspend fun deleteQuickExpense(quickExpense: com.mihab.expensetracker.data.local.QuickExpenseEntity) =
+        dao.deleteQuickExpense(quickExpense)
+
+    suspend fun getQuickExpensesCount(): Int =
+        dao.getQuickExpensesCount()
 }

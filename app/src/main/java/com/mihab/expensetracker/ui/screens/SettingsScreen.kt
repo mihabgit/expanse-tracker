@@ -1,9 +1,14 @@
 package com.mihab.expensetracker.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -19,7 +24,8 @@ import java.util.Locale
 fun SettingsScreen(
     onBackClick: () -> Unit,
     onLanguageChanged: () -> Unit,
-    onCurrencyChanged: () -> Unit
+    onCurrencyChanged: () -> Unit,
+    onManageQuickExpensesClick: () -> Unit
 ) {
     val context = LocalContext.current
     val isBengali = Locale.getDefault().language == "bn"
@@ -45,11 +51,13 @@ fun SettingsScreen(
             )
         }
     ) { padding ->
+        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
+                .padding(16.dp)
+                .verticalScroll(scrollState),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
@@ -138,6 +146,64 @@ fun SettingsScreen(
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                if (isBengali) "দ্রুত খরচ কাস্টমাইজ করুন" else "Customize Quick Expenses",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
+            Card(
+                onClick = onManageQuickExpensesClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        if (isBengali) "দ্রুত খরচ ম্যানেজ করুন" else "Manage Quick Expenses",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                if (isBengali) "টিউটোরিয়াল" else "Tutorial",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
+            Card(
+                onClick = {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://youtube.com/shorts/W3UfxJrjliQ?feature=share"))
+                    context.startActivity(intent)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        if (isBengali) "ভিডিও টিউটোরিয়াল দেখুন" else "Watch Video Tutorial",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text("📺")
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

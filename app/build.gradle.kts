@@ -6,16 +6,14 @@ plugins {
 
 android {
     namespace = "com.mihab.expensetracker"
-    compileSdk {
-        version = release(36)
-    }
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.mihab.expensetracker"
         minSdk = 24
-        targetSdk = 36
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 4
+        versionName = "1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -37,6 +35,11 @@ android {
         compose = true
     }
 
+    bundle {
+        language {
+            enableSplit = false
+        }
+    }
 }
 
 dependencies {

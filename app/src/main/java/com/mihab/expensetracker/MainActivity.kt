@@ -1,5 +1,6 @@
 package com.mihab.expensetracker
 
+import android.content.Context
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -13,6 +14,7 @@ import com.mihab.expensetracker.data.local.ExpenseDatabase
 import com.mihab.expensetracker.data.repository.ExpenseRepository
 import com.mihab.expensetracker.navigation.AppNavHost
 import com.mihab.expensetracker.ui.screens.ExpenseListScreen
+import com.mihab.expensetracker.ui.screens.Screen
 import com.mihab.expensetracker.ui.theme.ExpenseTrackerTheme
 import com.mihab.expensetracker.util.LocaleHelper
 import com.mihab.expensetracker.viewmodel.ExpenseViewModel
@@ -30,6 +32,9 @@ class MainActivity : ComponentActivity() {
         val repository = ExpenseRepository(db.expenseDao())
         val factory = ExpenseViewModelFactory(repository)
 
+        val sharedPref = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val isFirstRun = sharedPref.getBoolean("is_first_run", true)
+
         setContent {
             val navController = rememberNavController()
             val viewModel: ExpenseViewModel = viewModel(factory = factory)
@@ -40,14 +45,24 @@ class MainActivity : ComponentActivity() {
                     AppNavHost(
                         navController = navController,
                         viewModel = viewModel,
+                        startDestination = if (isFirstRun) Screen.Onboarding.route else Screen.Home.route,
                         onLanguageChanged = {
                             languageChanged++
+                        },
+                        onOnboardingFinished = {
+                            if (isFirstRun) {
+                                sharedPref.edit().putBoolean("is_first_run", false).apply()
+                                navController.navigate(Screen.Home.route) {
+                                    popUpTo(Screen.Onboarding.route) { inclusive = true }
+                                }
+                            } else {
+                                navController.popBackStack()
+                            }
                         }
                     )
                 }
             }
         }
-
     }
 }
 

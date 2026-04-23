@@ -3,6 +3,7 @@ package com.mihab.expensetracker.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.mihab.expensetracker.data.local.ExpenseEntity
+import com.mihab.expensetracker.data.local.QuickExpenseEntity
 import com.mihab.expensetracker.data.repository.ExpenseRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -50,6 +51,45 @@ class ExpenseViewModel(
             SharingStarted.WhileSubscribed(5_000),
             0.0
         )
+
+    val quickExpenses = repository.getAllQuickExpenses().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
+    init {
+        viewModelScope.launch {
+            if (repository.getQuickExpensesCount() == 0) {
+                val defaultQuickExpenses = listOf(
+                    QuickExpenseEntity(icon = "☕", category = "Coffee", categoryBn = "কফি", amount = 100.0, color = 0xFF795548.toInt()),
+                    QuickExpenseEntity(icon = "🚌", category = "Bus Fare", categoryBn = "বাস ভাড়া", amount = 30.0, color = 0xFF2196F3.toInt()),
+                    QuickExpenseEntity(icon = "🍔", category = "Lunch", categoryBn = "দুপুরের খাবার", amount = 250.0, color = 0xFFFF9800.toInt()),
+                    QuickExpenseEntity(icon = "🍿", category = "Snacks", categoryBn = "নাস্তা", amount = 50.0, color = 0xFFE91E63.toInt()),
+                    QuickExpenseEntity(icon = "🛒", category = "Grocery", categoryBn = "মুদি খরচ", amount = 500.0, color = 0xFF4CAF50.toInt())
+                )
+                defaultQuickExpenses.forEach { repository.insertQuickExpense(it) }
+            }
+        }
+    }
+
+    fun addQuickExpense(icon: String, category: String, categoryBn: String, amount: Double, color: Int) {
+        viewModelScope.launch {
+            repository.insertQuickExpense(QuickExpenseEntity(icon = icon, category = category, categoryBn = categoryBn, amount = amount, color = color))
+        }
+    }
+
+    fun updateQuickExpense(quickExpense: QuickExpenseEntity) {
+        viewModelScope.launch {
+            repository.updateQuickExpense(quickExpense)
+        }
+    }
+
+    fun deleteQuickExpense(quickExpense: QuickExpenseEntity) {
+        viewModelScope.launch {
+            repository.deleteQuickExpense(quickExpense)
+        }
+    }
 
     private val _selectedMonthRange = MutableStateFlow(getCurrentMonthRange())
 
@@ -126,14 +166,15 @@ class ExpenseViewModel(
     fun addExpense(
         amount: Double,
         category: String,
-        note: String?
+        note: String?,
+        date: Long = System.currentTimeMillis()
     ) {
         viewModelScope.launch {
             repository.addExpense(
                 ExpenseEntity(
                     amount = amount,
                     category = category,
-                    date = System.currentTimeMillis(),
+                    date = date,
                     note = note
                 )
             )

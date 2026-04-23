@@ -47,6 +47,21 @@ interface ExpenseDao {
         GROUP BY category
     """)
     fun getCategoryTotalsByTimeRange(startTime: Long, endTime: Long): Flow<List<CategoryTotal>>
+
+    @Insert
+    suspend fun insertQuickExpense(quickExpense: QuickExpenseEntity)
+
+    @androidx.room.Update
+    suspend fun updateQuickExpense(quickExpense: QuickExpenseEntity)
+
+    @androidx.room.Delete
+    suspend fun deleteQuickExpense(quickExpense: QuickExpenseEntity)
+
+    @Query("SELECT * FROM quick_expenses")
+    fun getAllQuickExpenses(): Flow<List<QuickExpenseEntity>>
+
+    @Query("SELECT COUNT(*) FROM quick_expenses")
+    suspend fun getQuickExpensesCount(): Int
 }
 
 data class CategoryTotal(
