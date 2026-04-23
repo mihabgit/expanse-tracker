@@ -25,7 +25,8 @@ fun SettingsScreen(
     onBackClick: () -> Unit,
     onLanguageChanged: () -> Unit,
     onCurrencyChanged: () -> Unit,
-    onManageQuickExpensesClick: () -> Unit
+    onManageQuickExpensesClick: () -> Unit,
+    onTutorialClick: () -> Unit
 ) {
     val context = LocalContext.current
     val isBengali = Locale.getDefault().language == "bn"
