@@ -6,7 +6,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -18,30 +17,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mihab.expensetracker.data.local.QuickExpenseEntity
+import com.mihab.expensetracker.data.local.CategoryEntity
 import com.mihab.expensetracker.viewmodel.ExpenseViewModel
 import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ManageQuickExpensesScreen(
+fun ManageCategoriesScreen(
     viewModel: ExpenseViewModel,
     onBackClick: () -> Unit
 ) {
-    val quickExpenses by viewModel.quickExpenses.collectAsState()
+    val categories by viewModel.categories.collectAsState()
     val isBengali = Locale.getDefault().language == "bn"
     var showAddDialog by remember { mutableStateOf(false) }
-    var editingExpense by remember { mutableStateOf<QuickExpenseEntity?>(null) }
+    var editingCategory by remember { mutableStateOf<CategoryEntity?>(null) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        if (isBengali) "দ্রুত খরচ ম্যানেজ করুন" else "Manage Quick Expenses",
+                        if (isBengali) "ক্যাটাগরি ম্যানেজ করুন" else "Manage Categories",
                         style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold)
                     )
                 },
@@ -54,13 +52,13 @@ fun ManageQuickExpensesScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { showAddDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Quick Expense")
+                Icon(Icons.Default.Add, contentDescription = "Add Category")
             }
         }
     ) { padding ->
-        if (quickExpenses.isEmpty()) {
+        if (categories.isEmpty()) {
             Box(modifier = Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                Text(if (isBengali) "কোন দ্রুত খরচ পাওয়া যায়নি।" else "No quick expenses found.")
+                Text(if (isBengali) "কোন ক্যাটাগরি পাওয়া যায়নি।" else "No categories found.")
             }
         } else {
             LazyColumn(
@@ -71,41 +69,40 @@ fun ManageQuickExpensesScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp),
                 contentPadding = PaddingValues(top = 16.dp, bottom = 80.dp)
             ) {
-                items(quickExpenses) { expense ->
-                    QuickExpenseItem(
-                        expense = expense,
+                items(categories) { category ->
+                    CategoryItem(
+                        category = category,
                         isBengali = isBengali,
-                        onEdit = { editingExpense = expense },
-                        onDelete = { viewModel.deleteQuickExpense(expense) }
+                        onEdit = { editingCategory = category },
+                        onDelete = { viewModel.deleteCategory(category) }
                     )
                 }
             }
         }
 
         if (showAddDialog) {
-            QuickExpenseDialog(
+            CategoryDialog(
                 onDismiss = { showAddDialog = false },
-                onSave = { icon, cat, catBn, amount, color ->
-                    viewModel.addQuickExpense(icon, cat, catBn, amount, color)
+                onSave = { name, nameBn, icon, color ->
+                    viewModel.addCategory(name, nameBn, icon, color)
                     showAddDialog = false
                 },
                 isBengali = isBengali
             )
         }
 
-        if (editingExpense != null) {
-            QuickExpenseDialog(
-                expense = editingExpense,
-                onDismiss = { editingExpense = null },
-                onSave = { icon, cat, catBn, amount, color ->
-                    viewModel.updateQuickExpense(editingExpense!!.copy(
+        if (editingCategory != null) {
+            CategoryDialog(
+                category = editingCategory,
+                onDismiss = { editingCategory = null },
+                onSave = { name, nameBn, icon, color ->
+                    viewModel.updateCategory(editingCategory!!.copy(
+                        name = name,
+                        nameBn = nameBn,
                         icon = icon,
-                        category = cat,
-                        categoryBn = catBn,
-                        amount = amount,
                         color = color
                     ))
-                    editingExpense = null
+                    editingCategory = null
                 },
                 isBengali = isBengali
             )
@@ -114,18 +111,18 @@ fun ManageQuickExpensesScreen(
 }
 
 @Composable
-fun QuickExpenseItem(
-    expense: QuickExpenseEntity,
+fun CategoryItem(
+    category: CategoryEntity,
     isBengali: Boolean,
     onEdit: () -> Unit,
     onDelete: () -> Unit
 ) {
-    val quickColor = Color(expense.color)
+    val categoryColor = Color(category.color)
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
-            containerColor = quickColor.copy(alpha = 0.1f)
+            containerColor = categoryColor.copy(alpha = 0.1f)
         )
     ) {
         Row(
@@ -139,22 +136,25 @@ fun QuickExpenseItem(
                 Box(
                     modifier = Modifier
                         .size(48.dp)
-                        .background(quickColor.copy(alpha = 0.2f), CircleShape),
+                        .background(categoryColor.copy(alpha = 0.2f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(expense.icon, fontSize = 24.sp)
+                    Text(category.icon, fontSize = 24.sp)
                 }
                 Spacer(modifier = Modifier.width(16.dp))
                 Column {
                     Text(
-                        if (isBengali) expense.categoryBn else expense.category,
+                        if (isBengali) category.nameBn else category.name,
                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = quickColor
+                        color = categoryColor
                     )
-                    Text(
-                        "Amount: ${expense.amount}",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                    if (category.isDefault) {
+                        Text(
+                            if (isBengali) "ডিফল্ট" else "Default",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.outline
+                        )
+                    }
                 }
             }
             Row {
@@ -171,23 +171,20 @@ fun QuickExpenseItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun QuickExpenseDialog(
-    expense: QuickExpenseEntity? = null,
+fun CategoryDialog(
+    category: CategoryEntity? = null,
     onDismiss: () -> Unit,
-    onSave: (String, String, String, Double, Int) -> Unit,
+    onSave: (String, String, String, Int) -> Unit,
     isBengali: Boolean
 ) {
-    var icon by remember { mutableStateOf(expense?.icon ?: "💰") }
-    var category by remember { mutableStateOf(expense?.category ?: "") }
-    var categoryBn by remember { mutableStateOf(expense?.categoryBn ?: "") }
-    var amount by remember { mutableStateOf(expense?.amount?.toString() ?: "") }
-    
-    // Default color for new ones
-    var color by remember { mutableStateOf(expense?.color ?: 0xFF6200EE.toInt()) }
+    var name by remember { mutableStateOf(category?.name ?: "") }
+    var nameBn by remember { mutableStateOf(category?.nameBn ?: "") }
+    var icon by remember { mutableStateOf(category?.icon ?: "💰") }
+    var color by remember { mutableStateOf(category?.color ?: 0xFF6200EE.toInt()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(if (expense == null) (if (isBengali) "নতুন যোগ করুন" else "Add New") else (if (isBengali) "এডিট করুন" else "Edit Quick Expense")) },
+        title = { Text(if (category == null) (if (isBengali) "নতুন ক্যাটাগরি" else "Add New Category") else (if (isBengali) "ক্যাটাগরি এডিট" else "Edit Category")) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
@@ -197,33 +194,27 @@ fun QuickExpenseDialog(
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
-                    value = category,
-                    onValueChange = { category = it },
-                    label = { Text(if (isBengali) "ক্যাটাগরি (English)" else "Category (English)") },
+                    value = name,
+                    onValueChange = { name = it },
+                    label = { Text(if (isBengali) "নাম (English)" else "Name (English)") },
                     modifier = Modifier.fillMaxWidth()
                 )
                 OutlinedTextField(
-                    value = categoryBn,
-                    onValueChange = { categoryBn = it },
-                    label = { Text(if (isBengali) "ক্যাটাগরি (বাংলা)" else "Category (Bengali)") },
+                    value = nameBn,
+                    onValueChange = { nameBn = it },
+                    label = { Text(if (isBengali) "নাম (বাংলা)" else "Name (Bengali)") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
-                    label = { Text(if (isBengali) "পরিমাণ" else "Amount") },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth()
-                )
+                // In a real app, you might want a color picker here. 
+                // For now, let's just use a simple text field or a few color options.
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    val amountVal = amount.toDoubleOrNull() ?: 0.0
-                    onSave(icon, category, categoryBn, amountVal, color)
+                    onSave(name, nameBn, icon, color)
                 },
-                enabled = category.isNotBlank() && amount.isNotBlank()
+                enabled = name.isNotBlank() && nameBn.isNotBlank() && icon.isNotBlank()
             ) {
                 Text(if (isBengali) "সেভ" else "Save")
             }

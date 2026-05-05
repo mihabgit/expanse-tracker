@@ -2,6 +2,7 @@ package com.mihab.expensetracker.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.mihab.expensetracker.data.local.CategoryEntity
 import com.mihab.expensetracker.data.local.ExpenseEntity
 import com.mihab.expensetracker.data.local.QuickExpenseEntity
 import com.mihab.expensetracker.data.repository.ExpenseRepository
@@ -58,6 +59,12 @@ class ExpenseViewModel(
         initialValue = emptyList()
     )
 
+    val categories = repository.getAllCategories().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = emptyList()
+    )
+
     init {
         viewModelScope.launch {
             if (repository.getQuickExpensesCount() == 0) {
@@ -70,6 +77,43 @@ class ExpenseViewModel(
                 )
                 defaultQuickExpenses.forEach { repository.insertQuickExpense(it) }
             }
+
+            if (repository.getCategoryCount() == 0) {
+                val defaultCategories = listOf(
+                    CategoryEntity(name = "Food", nameBn = "খাবার", icon = "🍔", isDefault = true, color = 0xFFFF9800.toInt()),
+                    CategoryEntity(name = "Transport", nameBn = "পরিবহন", icon = "🚌", isDefault = true, color = 0xFF2196F3.toInt()),
+                    CategoryEntity(name = "Rent", nameBn = "ভাড়া", icon = "🏠", isDefault = true, color = 0xFF795548.toInt()),
+                    CategoryEntity(name = "Grocery", nameBn = "মুদি", icon = "🛒", isDefault = true, color = 0xFFE91E63.toInt()),
+                    CategoryEntity(name = "Shopping", nameBn = "শপিং", icon = "🛍️", isDefault = true, color = 0xFFE91E63.toInt()),
+                    CategoryEntity(name = "Bills", nameBn = "বিল", icon = "📄", isDefault = true, color = 0xFF607D8B.toInt()),
+                    CategoryEntity(name = "Entertainment", nameBn = "বিনোদন", icon = "🎬", isDefault = true, color = 0xFF9C27B0.toInt()),
+                    CategoryEntity(name = "Health", nameBn = "স্বাস্থ্য", icon = "💊", isDefault = true, color = 0xFFF44336.toInt()),
+                    CategoryEntity(name = "Education", nameBn = "শিক্ষা", icon = "📚", isDefault = true, color = 0xFF3F51B5.toInt()),
+                    CategoryEntity(name = "Investment", nameBn = "বিনিয়োগ", icon = "📈", isDefault = true, color = 0xFF4CAF50.toInt()),
+                    CategoryEntity(name = "Gifts", nameBn = "উপহার", icon = "🎁", isDefault = true, color = 0xFFFF5722.toInt()),
+                    CategoryEntity(name = "Travel", nameBn = "ভ্রমণ", icon = "✈️", isDefault = true, color = 0xFF00BCD4.toInt()),
+                    CategoryEntity(name = "Other", nameBn = "অন্যান্য", icon = "💰", isDefault = true, color = 0xFF9E9E9E.toInt())
+                )
+                repository.insertCategories(defaultCategories)
+            }
+        }
+    }
+
+    fun addCategory(name: String, nameBn: String, icon: String, color: Int) {
+        viewModelScope.launch {
+            repository.addCategory(CategoryEntity(name = name, nameBn = nameBn, icon = icon, color = color))
+        }
+    }
+
+    fun updateCategory(category: CategoryEntity) {
+        viewModelScope.launch {
+            repository.updateCategory(category)
+        }
+    }
+
+    fun deleteCategory(category: CategoryEntity) {
+        viewModelScope.launch {
+            repository.deleteCategory(category)
         }
     }
 

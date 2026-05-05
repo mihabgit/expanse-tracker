@@ -41,7 +41,8 @@ fun HomeScreen(
     onSeeAllClick: () -> Unit,
     onSummaryClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onManageQuickClick: () -> Unit
+    onManageQuickClick: () -> Unit,
+    onLanguageToggle: () -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val currency = LocaleHelper.getCurrency(context)
@@ -49,6 +50,7 @@ fun HomeScreen(
     val recentExpenses by viewModel.recentExpenses.collectAsState()
     val todayCount by viewModel.todayCount.collectAsState()
     val quickExpenses by viewModel.quickExpenses.collectAsState()
+    val categories by viewModel.categories.collectAsState()
 
     val isBengali = Locale.getDefault().language == "bn"
 
@@ -69,6 +71,15 @@ fun HomeScreen(
                     }
                 },
                 actions = {
+                    TextButton(onClick = onLanguageToggle) {
+                        Text(
+                            text = if (isBengali) "EN" else "BN",
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        )
+                    }
                     IconButton(onClick = onSummaryClick) {
                         Icon(Icons.Default.Info, contentDescription = "Summary", tint = MaterialTheme.colorScheme.primary)
                     }
@@ -309,12 +320,14 @@ fun HomeScreen(
                                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(getCategoryEmoji(expense.category), fontSize = 24.sp)
+                                    val category = categories.find { it.name == expense.category }
+                                    Text(category?.icon ?: getCategoryEmoji(expense.category), fontSize = 24.sp)
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column {
+                                    val category = categories.find { it.name == expense.category }
                                     Text(
-                                        getCategoryName(expense.category, isBengali),
+                                        if (isBengali) category?.nameBn ?: getCategoryName(expense.category, true) else expense.category,
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                                     )
                                     val dateStr = SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault()).format(Date(expense.date))

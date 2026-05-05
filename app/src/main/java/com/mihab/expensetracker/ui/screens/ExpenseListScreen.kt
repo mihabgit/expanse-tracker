@@ -38,6 +38,7 @@ fun ExpenseListScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val currency = LocaleHelper.getCurrency(context)
     val expenses by viewModel.expenses.collectAsState()
+    val categories by viewModel.categories.collectAsState()
     val isBengali = Locale.getDefault().language == "bn"
     var expenseToDelete by remember { mutableStateOf<com.mihab.expensetracker.data.local.ExpenseEntity?>(null) }
 
@@ -118,12 +119,14 @@ fun ExpenseListScreen(
                                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    Text(getCategoryEmoji(expense.category), fontSize = 24.sp)
+                                    val category = categories.find { it.name == expense.category }
+                                    Text(category?.icon ?: getCategoryEmoji(expense.category), fontSize = 24.sp)
                                 }
                                 Spacer(modifier = Modifier.width(16.dp))
                                 Column {
+                                    val category = categories.find { it.name == expense.category }
                                     Text(
-                                        getCategoryName(expense.category, isBengali),
+                                        if (isBengali) category?.nameBn ?: getCategoryName(expense.category, true) else expense.category,
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                                     )
                                     val dateStr = SimpleDateFormat("dd MMM yyyy, hh:mm a", Locale.getDefault()).format(Date(expense.date))

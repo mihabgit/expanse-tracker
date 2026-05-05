@@ -43,6 +43,7 @@ fun SummaryScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val currency = LocaleHelper.getCurrency(context)
     val categoryTotals by viewModel.categoryTotals.collectAsState()
+    val categories by viewModel.categories.collectAsState()
     val totalSpend = categoryTotals.sumOf { it.totalAmount }
     val isBengali = Locale.getDefault().language == "bn"
     var monthOffset by remember { mutableIntStateOf(0) }
@@ -225,6 +226,7 @@ fun SummaryScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
+                                    val category = categories.find { it.name == total.category }
                                     Box(
                                         modifier = Modifier
                                             .size(36.dp)
@@ -232,11 +234,11 @@ fun SummaryScreen(
                                             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(getCategoryEmoji(total.category), fontSize = 18.sp)
+                                        Text(category?.icon ?: getCategoryEmoji(total.category), fontSize = 18.sp)
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
                                     Text(
-                                        getCategoryName(total.category, isBengali),
+                                        if (isBengali) category?.nameBn ?: getCategoryName(total.category, true) else total.category,
                                         style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                                     )
                                 }

@@ -1,6 +1,7 @@
 package com.mihab.expensetracker.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -8,18 +9,23 @@ import com.mihab.expensetracker.data.local.ExpenseEntity
 import com.mihab.expensetracker.ui.screens.AddExpenseScreen
 import com.mihab.expensetracker.ui.screens.ExpenseListScreen
 import com.mihab.expensetracker.ui.screens.HomeScreen
+import com.mihab.expensetracker.ui.screens.ManageCategoriesScreen
 import com.mihab.expensetracker.ui.screens.ManageQuickExpensesScreen
 import com.mihab.expensetracker.ui.screens.OnboardingScreen
 import com.mihab.expensetracker.ui.screens.Screen
 import com.mihab.expensetracker.ui.screens.SettingsScreen
 import com.mihab.expensetracker.ui.screens.SummaryScreen
+import com.mihab.expensetracker.util.LocaleHelper
 import com.mihab.expensetracker.viewmodel.ExpenseViewModel
+import java.util.Locale
 
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     viewModel: ExpenseViewModel,
     startDestination: String = Screen.Home.route,
+    themeMode: String = "system",
+    onThemeChanged: (String) -> Unit = {},
     onLanguageChanged: () -> Unit,
     onOnboardingFinished: () -> Unit = {}
 ) {
@@ -34,6 +40,7 @@ fun AppNavHost(
             )
         }
         composable(Screen.Home.route) {
+            val context = LocalContext.current
             HomeScreen(
                 viewModel = viewModel,
                 onAddClick = {
@@ -50,6 +57,12 @@ fun AppNavHost(
                 },
                 onManageQuickClick = {
                     navController.navigate(Screen.ManageQuickExpenses.route)
+                },
+                onLanguageToggle = {
+                    val currentLang = Locale.getDefault().language
+                    val newLang = if (currentLang == "bn") "en" else "bn"
+                    LocaleHelper.setLocale(context, newLang)
+                    onLanguageChanged()
                 }
             )
         }
@@ -64,14 +77,28 @@ fun AppNavHost(
                 onManageQuickExpensesClick = {
                     navController.navigate(Screen.ManageQuickExpenses.route)
                 },
+                onManageCategoriesClick = {
+                    navController.navigate(Screen.ManageCategories.route)
+                },
                 onTutorialClick = {
                     navController.navigate(Screen.Onboarding.route)
-                }
+                },
+                themeMode = themeMode,
+                onThemeChanged = onThemeChanged
             )
         }
 
         composable(Screen.ManageQuickExpenses.route) {
             ManageQuickExpensesScreen(
+                viewModel = viewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.ManageCategories.route) {
+            ManageCategoriesScreen(
                 viewModel = viewModel,
                 onBackClick = {
                     navController.popBackStack()
@@ -123,6 +150,9 @@ fun AppNavHost(
                 onUpdate = { expense: ExpenseEntity ->
                     viewModel.updateExpense(expense)
                     navController.popBackStack()
+                },
+                onEditCategoriesClick = {
+                    navController.navigate(Screen.ManageCategories.route)
                 },
                 onBackClick = {
                     navController.popBackStack()

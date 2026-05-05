@@ -37,26 +37,32 @@ import java.util.Locale
 @Composable
 fun AddExpenseScreen(
     expenseId: Int? = null,
-    viewModel: ExpenseViewModel? = null,
+    viewModel: ExpenseViewModel,
     onSave: (Double, String, String?, Long) -> Unit,
     onUpdate: (ExpenseEntity) -> Unit,
+    onEditCategoriesClick: () -> Unit,
     onBackClick: () -> Unit
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val currency = LocaleHelper.getCurrency(context)
+    val categories by viewModel.categories.collectAsState()
     var amount by remember { mutableStateOf("") }
     var note by remember { mutableStateOf("") }
-    var selectedCategory by remember { mutableStateOf("Food") }
+    var selectedCategory by remember { mutableStateOf("") }
     var selectedDate by remember { mutableLongStateOf(System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
-    var showCustomCategoryDialog by remember { mutableStateOf(false) }
-    var customCategoryName by remember { mutableStateOf("") }
     var existingExpense by remember { mutableStateOf<ExpenseEntity?>(null) }
 
     val isBengali = Locale.getDefault().language == "bn"
 
+    LaunchedEffect(categories) {
+        if (selectedCategory.isEmpty() && categories.isNotEmpty()) {
+            selectedCategory = categories.first().name
+        }
+    }
+
     LaunchedEffect(expenseId) {
-        if (expenseId != null && viewModel != null) {
+        if (expenseId != null) {
             val expense = viewModel.getExpenseById(expenseId)
             if (expense != null) {
                 existingExpense = expense
@@ -66,23 +72,6 @@ fun AddExpenseScreen(
                 selectedDate = expense.date
             }
         }
-    }
-
-    val defaultCategories = remember {
-        mutableStateListOf(
-            "Food" to "🍔",
-            "Transport" to "🚌",
-            "Rent" to "🏠",
-            "Shopping" to "🛒",
-            "Bills" to "📄",
-            "Entertainment" to "🎬",
-            "Health" to "💊",
-            "Education" to "📚",
-            "Investment" to "📈",
-            "Gifts" to "🎁",
-            "Travel" to "✈️",
-            "Other" to "💰"
-        )
     }
 
     Scaffold(
@@ -179,7 +168,7 @@ fun AddExpenseScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Category Selection Header with "Add Custom"
+            // Category Selection Header
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -189,25 +178,23 @@ fun AddExpenseScreen(
                     if (isBengali) "বিভাগ নির্বাচন করুন" else "Select Category",
                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
                 )
-                TextButton(onClick = { showCustomCategoryDialog = true }) {
-                    Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(if (isBengali) "নতুন" else "Custom")
+                TextButton(onClick = onEditCategoriesClick) {
+                    Text(if (isBengali) "সম্পাদনা" else "Edit")
                 }
             }
             
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Visual Category Grid (Manual Row implementation for scrollable column)
-            defaultCategories.chunked(3).forEach { rowItems ->
+            // Visual Category Grid
+            categories.chunked(3).forEach { rowItems ->
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    rowItems.forEach { (name, emoji) ->
-                        val isSelected = selectedCategory == name
+                    rowItems.forEach { category ->
+                        val isSelected = selectedCategory == category.name
                         Surface(
-                            onClick = { selectedCategory = name },
+                            onClick = { selectedCategory = category.name },
                             shape = RoundedCornerShape(20.dp),
                             color = if (isSelected) 
                                 MaterialTheme.colorScheme.primary 
@@ -223,9 +210,9 @@ fun AddExpenseScreen(
                                 verticalArrangement = Arrangement.Center,
                                 horizontalAlignment = Alignment.CenterHorizontally
                             ) {
-                                Text(emoji, fontSize = 24.sp)
+                                Text(category.icon, fontSize = 24.sp)
                                 Text(
-                                    getCategoryName(name, isBengali), 
+                                    if (isBengali) category.nameBn else category.name,
                                     style = MaterialTheme.typography.labelMedium,
                                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
                                     maxLines = 1
@@ -365,41 +352,5 @@ fun AddExpenseScreen(
             
             Spacer(modifier = Modifier.height(40.dp)) // Extra space for keyboard/scrolling
         }
-    }
-
-    // Custom Category Dialog
-    if (showCustomCategoryDialog) {
-        AlertDialog(
-            onDismissRequest = { showCustomCategoryDialog = false },
-            title = { Text(if (isBengali) "নতুন বিভাগ যোগ করুন" else "Add Custom Category") },
-            text = {
-                OutlinedTextField(
-                    value = customCategoryName,
-                    onValueChange = { customCategoryName = it },
-                    label = { Text(if (isBengali) "বিভাগের নাম" else "Category Name") },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
-                )
-            },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (customCategoryName.isNotBlank()) {
-                            defaultCategories.add(customCategoryName to "🏷️")
-                            selectedCategory = customCategoryName
-                            customCategoryName = ""
-                            showCustomCategoryDialog = false
-                        }
-                    }
-                ) {
-                    Text(if (isBengali) "যোগ করুন" else "Add")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showCustomCategoryDialog = false }) {
-                    Text(if (isBengali) "বাতিল" else "Cancel")
-                }
-            }
-        )
     }
 }

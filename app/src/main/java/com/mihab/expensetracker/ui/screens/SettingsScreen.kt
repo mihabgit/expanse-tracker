@@ -26,7 +26,10 @@ fun SettingsScreen(
     onLanguageChanged: () -> Unit,
     onCurrencyChanged: () -> Unit,
     onManageQuickExpensesClick: () -> Unit,
-    onTutorialClick: () -> Unit
+    onManageCategoriesClick: () -> Unit,
+    onTutorialClick: () -> Unit,
+    themeMode: String,
+    onThemeChanged: (String) -> Unit
 ) {
     val context = LocalContext.current
     val isBengali = Locale.getDefault().language == "bn"
@@ -150,6 +153,58 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
+                if (isBengali) "থিম পরিবর্তন করুন" else "Change Theme",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(if (isBengali) "সিস্টেম ডিফল্ট" else "System Default")
+                        RadioButton(
+                            selected = themeMode == "system",
+                            onClick = { onThemeChanged("system") }
+                        )
+                    }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(if (isBengali) "লাইট মোড" else "Light Mode")
+                        RadioButton(
+                            selected = themeMode == "light",
+                            onClick = { onThemeChanged("light") }
+                        )
+                    }
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(if (isBengali) "ডার্ক মোড" else "Dark Mode")
+                        RadioButton(
+                            selected = themeMode == "dark",
+                            onClick = { onThemeChanged("dark") }
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
                 if (isBengali) "দ্রুত খরচ কাস্টমাইজ করুন" else "Customize Quick Expenses",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
@@ -169,6 +224,32 @@ fun SettingsScreen(
                 ) {
                     Text(
                         if (isBengali) "দ্রুত খরচ ম্যানেজ করুন" else "Manage Quick Expenses",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                if (isBengali) "ক্যাটাগরি কাস্টমাইজ করুন" else "Customize Categories",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
+            Card(
+                onClick = onManageCategoriesClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        if (isBengali) "ক্যাটাগরি ম্যানেজ করুন" else "Manage Categories",
                         style = MaterialTheme.typography.bodyLarge
                     )
                 }

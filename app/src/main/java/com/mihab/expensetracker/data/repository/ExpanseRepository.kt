@@ -1,10 +1,15 @@
 package com.mihab.expensetracker.data.repository
 
+import com.mihab.expensetracker.data.local.CategoryDao
+import com.mihab.expensetracker.data.local.CategoryEntity
 import com.mihab.expensetracker.data.local.ExpenseDao
 import com.mihab.expensetracker.data.local.ExpenseEntity
 import kotlinx.coroutines.flow.Flow
 
-class ExpenseRepository(private val dao: ExpenseDao) {
+class ExpenseRepository(
+    private val dao: ExpenseDao,
+    private val categoryDao: CategoryDao
+) {
 
     fun getExpenses(): Flow<List<ExpenseEntity>> =
         dao.getAllExpenses()
@@ -47,4 +52,23 @@ class ExpenseRepository(private val dao: ExpenseDao) {
 
     suspend fun getQuickExpensesCount(): Int =
         dao.getQuickExpensesCount()
+
+    // Category Methods
+    fun getAllCategories(): Flow<List<CategoryEntity>> =
+        categoryDao.getAllCategories()
+
+    suspend fun addCategory(category: CategoryEntity) =
+        categoryDao.insertCategory(category)
+
+    suspend fun updateCategory(category: CategoryEntity) =
+        categoryDao.updateCategory(category)
+
+    suspend fun deleteCategory(category: CategoryEntity) =
+        categoryDao.deleteCategory(category)
+
+    suspend fun getCategoryCount(): Int =
+        categoryDao.getCategoryCount()
+
+    suspend fun insertCategories(categories: List<CategoryEntity>) =
+        categoryDao.insertCategories(categories)
 }

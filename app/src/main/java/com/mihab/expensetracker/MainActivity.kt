@@ -29,7 +29,7 @@ class MainActivity : ComponentActivity() {
         LocaleHelper.onAttach(this)
 
         val db = ExpenseDatabase.getInstance(this)
-        val repository = ExpenseRepository(db.expenseDao())
+        val repository = ExpenseRepository(db.expenseDao(), db.categoryDao())
         val factory = ExpenseViewModelFactory(repository)
 
         val sharedPref = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
@@ -39,13 +39,28 @@ class MainActivity : ComponentActivity() {
             val navController = rememberNavController()
             val viewModel: ExpenseViewModel = viewModel(factory = factory)
             var languageChanged by remember { mutableStateOf(0) }
+            
+            var themeMode by remember { 
+                mutableStateOf(sharedPref.getString("theme_mode", "system") ?: "system") 
+            }
+            
+            val isDarkMode = when (themeMode) {
+                "light" -> false
+                "dark" -> true
+                else -> androidx.compose.foundation.isSystemInDarkTheme()
+            }
 
-            ExpenseTrackerTheme {
+            ExpenseTrackerTheme(darkTheme = isDarkMode) {
                 key(languageChanged) {
                     AppNavHost(
                         navController = navController,
                         viewModel = viewModel,
                         startDestination = if (isFirstRun) Screen.Onboarding.route else Screen.Home.route,
+                        themeMode = themeMode,
+                        onThemeChanged = { mode ->
+                            themeMode = mode
+                            sharedPref.edit().putString("theme_mode", mode).apply()
+                        },
                         onLanguageChanged = {
                             languageChanged++
                         },
