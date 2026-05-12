@@ -1,5 +1,5 @@
 [versions]
-agp = "9.2.0"
+agp = "9.2.1"
 kotlinxCoroutinesAndroid = "1.10.2"
 lifecycleRuntimeKtxVersion = "2.10.0"
 lifecycleViewmodelCompose = "2.10.0"
@@ -16,8 +16,10 @@ kotlin = "2.2.10"
 composeBom = "2024.09.00"
 ksp = "2.3.2"
 mpandroidchart = "v3.1.0"
+workRuntimeKtx = "2.11.2"
 
 [libraries]
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workRuntimeKtx" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 androidx-lifecycle-runtime-ktx-v2100 = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtxVersion" }

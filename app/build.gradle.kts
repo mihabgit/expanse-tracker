@@ -74,4 +74,5 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.mpandroidchart)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.androidx.work.runtime.ktx)
 }

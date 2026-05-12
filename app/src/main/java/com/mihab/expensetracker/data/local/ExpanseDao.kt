@@ -36,6 +36,18 @@ interface ExpenseDao {
     fun getTodayTotal(startOfDay: Long, endOfDay: Long): Flow<Double?>
 
     @Query("""
+        SELECT COUNT(*) FROM expenses 
+        WHERE date >= :startOfDay AND date <= :endOfDay
+    """)
+    suspend fun getExpenseCountInTimeRange(startOfDay: Long, endOfDay: Long): Int
+
+    @Query("""
+        SELECT SUM(amount) FROM expenses 
+        WHERE date >= :startOfDay AND date <= :endOfDay
+    """)
+    suspend fun getTotalInTimeRange(startOfDay: Long, endOfDay: Long): Double?
+
+    @Query("""
         SELECT SUM(amount) FROM expenses 
         WHERE strftime('%m', date / 1000, 'unixepoch') = :month
     """)

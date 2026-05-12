@@ -47,6 +47,7 @@ fun HomeScreen(
     val context = androidx.compose.ui.platform.LocalContext.current
     val currency = LocaleHelper.getCurrency(context)
     val todayTotal by viewModel.todayTotal.collectAsState()
+    val thisMonthTotal by viewModel.thisMonthTotal.collectAsState()
     val recentExpenses by viewModel.recentExpenses.collectAsState()
     val todayCount by viewModel.todayCount.collectAsState()
     val quickExpenses by viewModel.quickExpenses.collectAsState()
@@ -112,8 +113,8 @@ fun HomeScreen(
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(170.dp),
-                    shape = RoundedCornerShape(28.dp),
+                        .height(140.dp),
+                    shape = RoundedCornerShape(24.dp),
                     elevation = CardDefaults.cardElevation(defaultElevation = if (isDark) 0.dp else 8.dp)
                 ) {
                     Box(
@@ -134,50 +135,84 @@ fun HomeScreen(
                                     }
                                 )
                             )
-                            .padding(24.dp)
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
                     ) {
                         // Background decorative shapes
                         Box(
                             modifier = Modifier
-                                .size(150.dp)
-                                .offset(x = 60.dp, y = (-40).dp)
+                                .size(120.dp)
+                                .offset(x = 50.dp, y = (-30).dp)
                                 .align(Alignment.TopEnd)
                                 .background(Color.White.copy(alpha = 0.1f), CircleShape)
                         )
                         
-                        Column(modifier = Modifier.fillMaxHeight(), verticalArrangement = Arrangement.Center) {
-                            Text(
-                                if (isBengali) "আজকের মোট খরচ" else "Total Spend Today",
-                                color = Color.White.copy(alpha = 0.9f),
-                                style = MaterialTheme.typography.titleMedium.copy(letterSpacing = 0.5.sp)
-                            )
-                            Spacer(modifier = Modifier.height(4.dp))
-                            Text(
-                                "$currency ${"%.2f".format(todayTotal)}",
-                                color = Color.White,
-                                style = MaterialTheme.typography.headlineLarge.copy(
-                                    fontWeight = FontWeight.Black,
-                                    fontSize = 40.sp
+                        Row(
+                            modifier = Modifier.fillMaxSize(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    if (isBengali) "আজকের খরচ" else "Today",
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    style = MaterialTheme.typography.labelLarge
                                 )
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Surface(
-                                color = Color.White.copy(alpha = 0.15f),
-                                shape = RoundedCornerShape(12.dp)
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Box(modifier = Modifier.size(8.dp).background(Color(0xFF4CAF50), CircleShape))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text(
-                                        if (isBengali) "আজ $todayCount টি লেনদেন" else "$todayCount transactions today",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    "$currency${"%.0f".format(todayTotal)}",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.headlineLarge.copy(
+                                        fontWeight = FontWeight.Black,
+                                        fontSize = 32.sp
                                     )
+                                )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Surface(
+                                    color = Color.White.copy(alpha = 0.15f),
+                                    shape = RoundedCornerShape(10.dp)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(modifier = Modifier.size(6.dp).background(Color(0xFF4CAF50), CircleShape))
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            if (isBengali) "$todayCount টি লেনদেন" else "$todayCount txns",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = Color.White,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
                                 }
+                            }
+
+                            // Vertical Divider
+                            Box(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .height(60.dp)
+                                    .background(Color.White.copy(alpha = 0.2f))
+                            )
+
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                horizontalAlignment = Alignment.End
+                            ) {
+                                Text(
+                                    if (isBengali) "এই মাসের খরচ" else "This Month",
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    "$currency${"%.0f".format(thisMonthTotal)}",
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.headlineMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 28.sp
+                                    )
+                                )
                             }
                         }
                     }

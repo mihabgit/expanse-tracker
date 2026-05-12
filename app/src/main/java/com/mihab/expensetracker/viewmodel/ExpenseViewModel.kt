@@ -6,17 +6,21 @@ import com.mihab.expensetracker.data.local.CategoryEntity
 import com.mihab.expensetracker.data.local.ExpenseEntity
 import com.mihab.expensetracker.data.local.QuickExpenseEntity
 import com.mihab.expensetracker.data.repository.ExpenseRepository
+import com.mihab.expensetracker.util.NotificationHelper
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import java.util.Calendar
+import java.util.Locale
 
 class ExpenseViewModel(
-    private val repository: ExpenseRepository
+    private val repository: ExpenseRepository,
+    private val notificationHelper: NotificationHelper? = null
 ) : ViewModel() {
 
     val expenses = repository.getExpenses()
@@ -53,6 +57,14 @@ class ExpenseViewModel(
             0.0
         )
 
+    val thisMonthTotal = repository.getTodayTotal(getCurrentMonthRange().first, getCurrentMonthRange().second)
+        .map { it ?: 0.0 }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5_000),
+            0.0
+        )
+
     val quickExpenses = repository.getAllQuickExpenses().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5000),
@@ -64,6 +76,25 @@ class ExpenseViewModel(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = emptyList()
     )
+
+    private val _showSpendingDialog = MutableStateFlow<String?>(null)
+    val showSpendingDialog = _showSpendingDialog.asStateFlow()
+
+    private var isSpendingAlertEnabled = true
+    private var onDisableAlerts: (() -> Unit)? = null
+
+    fun setSpendingAlertEnabled(enabled: Boolean, onDisable: () -> Unit) {
+        isSpendingAlertEnabled = enabled
+        onDisableAlerts = onDisable
+    }
+
+    fun dismissSpendingDialog(dontShowAgain: Boolean = false) {
+        _showSpendingDialog.value = null
+        if (dontShowAgain) {
+            isSpendingAlertEnabled = false
+            onDisableAlerts?.invoke()
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -222,7 +253,56 @@ class ExpenseViewModel(
                     note = note
                 )
             )
+            
+            // Check if spend today > spend yesterday for notification
+            checkSpendingAlert()
         }
+    }
+
+    private suspend fun checkSpendingAlert() {
+        if (!isSpendingAlertEnabled) return
+
+        val todayStart = getStartOfDay()
+        val todayEnd = getEndOfDay()
+        
+        val yesterday = Calendar.getInstance().apply { add(Calendar.DAY_OF_YEAR, -1) }
+        val yesterdayStart = getStartOfDay(yesterday)
+        val yesterdayEnd = getEndOfDay(yesterday)
+        
+        val todayTotalVal = repository.getTotalInTimeRange(todayStart, todayEnd) ?: 0.0
+        val yesterdayTotalVal = repository.getTotalInTimeRange(yesterdayStart, yesterdayEnd) ?: 0.0
+        
+        if (todayTotalVal > yesterdayTotalVal && yesterdayTotalVal > 0) {
+            // Logic to prevent multiple notifications in the same day
+            // We can check a simple logic or just let it show if user wants it "whenever it exceed"
+            // But usually once is enough. Let's stick to showing it for now as requested.
+
+            val isBengali = Locale.getDefault().language == "bn"
+            val message = if (isBengali) 
+                "সতর্কতা! গতকালকের চেয়ে আজ আপনি বেশি খরচ করেছেন!" 
+            else 
+                "Spending Alert! You have spent more today than yesterday!"
+            
+            _showSpendingDialog.value = message
+        }
+    }
+
+    private fun getStartOfDay(calendar: Calendar): Long {
+        val cal = calendar.clone() as Calendar
+        cal.set(Calendar.HOUR_OF_DAY, 0)
+        cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0)
+        cal.set(Calendar.MILLISECOND, 0)
+        return cal.timeInMillis
+    }
+
+    private fun getEndOfDay(calendar: Calendar): Long {
+        val cal = calendar.clone() as Calendar
+        cal.set(Calendar.HOUR_OF_DAY, 23)
+        cal.set(Calendar.MINUTE, 59)
+        cal.set(Calendar.SECOND, 59)
+        cal.set(Calendar.MILLISECOND, 999)
+        return cal.timeInMillis
     }
 
     fun deleteExpense(expense: ExpenseEntity) {

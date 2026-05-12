@@ -53,6 +53,12 @@ class ExpenseRepository(
     suspend fun getQuickExpensesCount(): Int =
         dao.getQuickExpensesCount()
 
+    suspend fun getExpenseCountInTimeRange(startOfDay: Long, endOfDay: Long): Int =
+        dao.getExpenseCountInTimeRange(startOfDay, endOfDay)
+
+    suspend fun getTotalInTimeRange(startOfDay: Long, endOfDay: Long): Double? =
+        dao.getTotalInTimeRange(startOfDay, endOfDay)
+
     // Category Methods
     fun getAllCategories(): Flow<List<CategoryEntity>> =
         categoryDao.getAllCategories()
