@@ -13,6 +13,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -29,14 +30,17 @@ fun SettingsScreen(
     onManageCategoriesClick: () -> Unit,
     onTutorialClick: () -> Unit,
     themeMode: String,
-    onThemeChanged: (String) -> Unit
+    onThemeChanged: (String) -> Unit,
+    showBKashCard: Boolean,
+    onBKashCardToggle: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val isBengali = Locale.getDefault().language == "bn"
     var currentLanguage by remember { mutableStateOf(if (isBengali) "bn" else "en") }
     var currentCurrency by remember { mutableStateOf(LocaleHelper.getCurrency(context)) }
 
-    val currencies = listOf("৳", "$", "€", "£", "₹")
+    //val currencies = listOf("৳", "$", "€", "£", "₹")
+    val currencies = listOf("৳", "$")
 
     Scaffold(
         topBar = {
@@ -205,6 +209,44 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
+                if (isBengali) "বিকাশ সারসংক্ষেপ টুল" else "bKash Summary Tool",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            if (isBengali) "হোম স্ক্রিনে দেখান" else "Show on Home Screen",
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                        Text(
+                            if (isBengali) "বিকাশ ট্রানজেকশন ট্র্যাকিং কার্ড" else "bKash transaction tracking card",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                    Switch(
+                        checked = showBKashCard,
+                        onCheckedChange = onBKashCardToggle
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
                 if (isBengali) "দ্রুত খরচ কাস্টমাইজ করুন" else "Customize Quick Expenses",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
@@ -285,7 +327,32 @@ fun SettingsScreen(
                     Text("📺")
                 }
             }
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // App Version Section
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                val versionName = try {
+                    val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+                    packageInfo.versionName
+                } catch (_: Exception) {
+                    "1.0.5"
+                }
+
+                Text(
+                    text = if (isBengali) "ভার্সন $versionName" else "Version $versionName",
+                    style = MaterialTheme.typography.labelMedium,
+                    color = Color.Gray
+                )
+                Text(
+                    text = if (isBengali) "© ২০২৬ খরচ খাতা" else "© 2026 Expense Tracker",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.Gray.copy(alpha = 0.7f)
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

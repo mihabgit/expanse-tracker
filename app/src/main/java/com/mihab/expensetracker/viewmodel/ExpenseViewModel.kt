@@ -6,6 +6,8 @@ import com.mihab.expensetracker.data.local.CategoryEntity
 import com.mihab.expensetracker.data.local.ExpenseEntity
 import com.mihab.expensetracker.data.local.QuickExpenseEntity
 import com.mihab.expensetracker.data.repository.ExpenseRepository
+import com.mihab.expensetracker.util.BKashSmsParser
+import com.mihab.expensetracker.util.BKashTransaction
 import com.mihab.expensetracker.util.NotificationHelper
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.map
@@ -22,6 +24,50 @@ class ExpenseViewModel(
     private val repository: ExpenseRepository,
     private val notificationHelper: NotificationHelper? = null
 ) : ViewModel() {
+
+    private val _bkashTransactions = MutableStateFlow<List<BKashTransaction>>(emptyList())
+    val bkashTransactions = _bkashTransactions.asStateFlow()
+
+    fun loadBKashTransactions(context: android.content.Context) {
+        viewModelScope.launch {
+            val transactions = mutableListOf<BKashTransaction>()
+            val uri = android.net.Uri.parse("content://sms/inbox")
+            
+            // STRICT FILTER: Only query messages where the sender address is exactly "bKash"
+            // This prevents the app from even seeing personal messages in the cursor.
+            val cursor = try {
+                context.contentResolver.query(
+                    uri,
+                    arrayOf("body", "date", "address"),
+                    "address = ?",
+                    arrayOf("bKash"),
+                    "date DESC"
+                )
+            } catch (e: Exception) {
+                null
+            }
+
+            cursor?.use {
+                val bodyIndex = it.getColumnIndex("body")
+                val dateIndex = it.getColumnIndex("date")
+                val addressIndex = it.getColumnIndex("address")
+                
+                while (it.moveToNext()) {
+                    val address = it.getString(addressIndex)
+                    
+                    // DOUBLE VERIFICATION: Extra check to ensure we only process bKash messages
+                    if (address?.equals("bKash", ignoreCase = true) == true) {
+                        val body = it.getString(bodyIndex)
+                        val date = it.getLong(dateIndex)
+                        BKashSmsParser.parse(body, date)?.let { transaction ->
+                            transactions.add(transaction)
+                        }
+                    }
+                }
+            }
+            _bkashTransactions.value = transactions
+        }
+    }
 
     val expenses = repository.getExpenses()
         .stateIn(

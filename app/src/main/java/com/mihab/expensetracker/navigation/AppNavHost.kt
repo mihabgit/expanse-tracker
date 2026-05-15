@@ -26,6 +26,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.mihab.expensetracker.data.local.ExpenseEntity
 import com.mihab.expensetracker.ui.screens.AddExpenseScreen
+import com.mihab.expensetracker.ui.screens.BKashSummaryScreen
 import com.mihab.expensetracker.ui.screens.ExpenseListScreen
 import com.mihab.expensetracker.ui.screens.HomeScreen
 import com.mihab.expensetracker.ui.screens.ManageCategoriesScreen
@@ -45,6 +46,8 @@ fun AppNavHost(
     startDestination: String = Screen.Home.route,
     themeMode: String = "system",
     onThemeChanged: (String) -> Unit = {},
+    showBKashCard: Boolean = true,
+    onBKashCardToggle: (Boolean) -> Unit = {},
     onLanguageChanged: () -> Unit,
     onOnboardingFinished: () -> Unit = {}
 ) {
@@ -115,7 +118,11 @@ fun AppNavHost(
                     val newLang = if (currentLang == "bn") "en" else "bn"
                     LocaleHelper.setLocale(context, newLang)
                     onLanguageChanged()
-                }
+                },
+                onBKashClick = {
+                    navController.navigate(Screen.BKashSummary.route)
+                },
+                showBKashCard = showBKashCard
             )
         }
 
@@ -136,7 +143,9 @@ fun AppNavHost(
                     navController.navigate(Screen.Onboarding.route)
                 },
                 themeMode = themeMode,
-                onThemeChanged = onThemeChanged
+                onThemeChanged = onThemeChanged,
+                showBKashCard = showBKashCard,
+                onBKashCardToggle = onBKashCardToggle
             )
         }
 
@@ -151,6 +160,15 @@ fun AppNavHost(
 
         composable(Screen.ManageCategories.route) {
             ManageCategoriesScreen(
+                viewModel = viewModel,
+                onBackClick = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(Screen.BKashSummary.route) {
+            BKashSummaryScreen(
                 viewModel = viewModel,
                 onBackClick = {
                     navController.popBackStack()

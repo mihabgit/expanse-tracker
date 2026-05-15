@@ -75,6 +75,10 @@ class MainActivity : ComponentActivity() {
                 else -> androidx.compose.foundation.isSystemInDarkTheme()
             }
 
+            var showBKashCard by remember {
+                mutableStateOf(sharedPref.getBoolean("show_bkash_card", true))
+            }
+
             ExpenseTrackerTheme(darkTheme = isDarkMode) {
                 key(languageChanged) {
                     AppNavHost(
@@ -85,6 +89,11 @@ class MainActivity : ComponentActivity() {
                         onThemeChanged = { mode ->
                             themeMode = mode
                             sharedPref.edit().putString("theme_mode", mode).apply()
+                        },
+                        showBKashCard = showBKashCard,
+                        onBKashCardToggle = { enabled ->
+                            showBKashCard = enabled
+                            sharedPref.edit().putBoolean("show_bkash_card", enabled).apply()
                         },
                         onLanguageChanged = {
                             languageChanged++

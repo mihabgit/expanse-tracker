@@ -10,6 +10,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
@@ -42,7 +43,9 @@ fun HomeScreen(
     onSummaryClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onManageQuickClick: () -> Unit,
-    onLanguageToggle: () -> Unit
+    onLanguageToggle: () -> Unit,
+    onBKashClick: () -> Unit,
+    showBKashCard: Boolean
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val currency = LocaleHelper.getCurrency(context)
@@ -299,6 +302,59 @@ fun HomeScreen(
                                     )
                                 }
                             }
+                        }
+                    }
+                }
+            }
+
+            // bKash Summary Tool 📱
+            if (showBKashCard) {
+                item {
+                    Card(
+                        onClick = onBKashClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(0xFFE2136E).copy(alpha = 0.05f)
+                        ),
+                        border = androidx.compose.foundation.BorderStroke(1.dp, Color(0xFFE2136E).copy(alpha = 0.1f))
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(20.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .background(Color(0xFFE2136E), CircleShape),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text("b", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 24.sp)
+                                }
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Column {
+                                    Text(
+                                        if (isBengali) "বিকাশ সারসংক্ষেপ" else "bKash Summary",
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color(0xFFE2136E)
+                                    )
+                                    Text(
+                                        if (isBengali) "SMS থেকে আপনার খরচ দেখুন" else "Track spendings from SMS",
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Color.Gray
+                                    )
+                                }
+                            }
+                            Icon(
+                                Icons.AutoMirrored.Filled.KeyboardArrowRight, 
+                                contentDescription = null, 
+                                tint = Color(0xFFE2136E)
+                            )
                         }
                     }
                 }

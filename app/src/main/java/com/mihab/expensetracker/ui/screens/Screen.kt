@@ -8,5 +8,6 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
     data object ManageQuickExpenses : Screen("manage_quick_expenses")
     data object ManageCategories : Screen("manage_categories")
+    data object BKashSummary : Screen("bkash_summary")
     data object Onboarding : Screen("onboarding")
 }
