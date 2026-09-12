@@ -26,6 +26,7 @@ import com.mihab.expensetracker.util.NotificationHelper
 import com.mihab.expensetracker.viewmodel.ExpenseViewModel
 import com.mihab.expensetracker.viewmodel.ExpenseViewModelFactory
 import com.mihab.expensetracker.worker.ExpenseNotificationWorker
+import java.util.Calendar
 import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
@@ -121,14 +122,28 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun scheduleNotifications() {
+        val currentDate = Calendar.getInstance()
+        val dueDate = Calendar.getInstance()
+
+        // Set execution time to 9 PM (21:00)
+        dueDate.set(Calendar.HOUR_OF_DAY, 21)
+        dueDate.set(Calendar.MINUTE, 0)
+        dueDate.set(Calendar.SECOND, 0)
+
+        if (dueDate.before(currentDate)) {
+            dueDate.add(Calendar.HOUR_OF_DAY, 24)
+        }
+
+        val timeDiff = dueDate.timeInMillis - currentDate.timeInMillis
+
         val workRequest = PeriodicWorkRequestBuilder<ExpenseNotificationWorker>(
             1, TimeUnit.DAYS
-        ).setInitialDelay(8, TimeUnit.HOURS) // Run roughly in the evening if started in morning
+        ).setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
             .build()
 
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             "expense_notification_work",
-            ExistingPeriodicWorkPolicy.KEEP,
+            ExistingPeriodicWorkPolicy.UPDATE, // Update to refresh schedule if needed
             workRequest
         )
     }
