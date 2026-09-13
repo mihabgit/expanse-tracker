@@ -87,6 +87,9 @@ fun BKashSummaryScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            //AdBanner()
         }
     ) { padding ->
         if (!hasSmsPermission) {

@@ -32,7 +32,8 @@ fun SettingsScreen(
     themeMode: String,
     onThemeChanged: (String) -> Unit,
     showBKashCard: Boolean,
-    onBKashCardToggle: (Boolean) -> Unit
+    onBKashCardToggle: (Boolean) -> Unit,
+    onExportClick: () -> Unit
 ) {
     val context = LocalContext.current
     val isBengali = Locale.getDefault().language == "bn"
@@ -57,6 +58,9 @@ fun SettingsScreen(
                     }
                 }
             )
+        },
+        bottomBar = {
+            //AdBanner()
         }
     ) { padding ->
         val scrollState = rememberScrollState()
@@ -294,6 +298,33 @@ fun SettingsScreen(
                         if (isBengali) "ক্যাটাগরি ম্যানেজ করুন" else "Manage Categories",
                         style = MaterialTheme.typography.bodyLarge
                     )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                if (isBengali) "ডেটা এক্সপোর্ট করুন" else "Export Data",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
+            Card(
+                onClick = onExportClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        if (isBengali) "CSV ফাইল এক্সপোর্ট করুন" else "Export to CSV",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text("📊")
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))

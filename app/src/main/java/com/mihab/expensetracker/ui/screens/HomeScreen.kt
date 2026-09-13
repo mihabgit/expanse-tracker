@@ -27,7 +27,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.mihab.expensetracker.ui.components.AdBanner
 import com.mihab.expensetracker.util.LocaleHelper
 import com.mihab.expensetracker.viewmodel.ExpenseViewModel
 import java.text.SimpleDateFormat

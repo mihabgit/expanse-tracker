@@ -23,8 +23,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.mihab.expensetracker.ui.components.AdBanner
 import com.mihab.expensetracker.util.LocaleHelper
+import com.mihab.expensetracker.util.CategoryUtils
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
@@ -212,7 +212,14 @@ fun SummaryScreen(
                 }
             } else {
                 items(categoryTotals) { total ->
-                    val percentage = if (totalSpend > 0) (total.totalAmount / totalSpend).toFloat() else 0f
+                    val hasBudget = total.budget > 0
+                    val percentage = if (hasBudget) {
+                        (total.totalAmount / total.budget).toFloat().coerceAtMost(1f)
+                    } else if (totalSpend > 0) {
+                        (total.totalAmount / totalSpend).toFloat()
+                    } else 0f
+
+                    val isOverBudget = hasBudget && total.totalAmount > total.budget
 
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
@@ -226,7 +233,7 @@ fun SummaryScreen(
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    val category = categories.find { it.name == total.category }
+                                    val category = categories.find { it.name == total.category || it.nameBn == total.category }
                                     Box(
                                         modifier = Modifier
                                             .size(36.dp)
@@ -234,18 +241,44 @@ fun SummaryScreen(
                                             .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
                                         contentAlignment = Alignment.Center
                                     ) {
-                                        Text(category?.icon ?: getCategoryEmoji(total.category), fontSize = 18.sp)
+                                        Text(category?.icon ?: CategoryUtils.getCategoryEmoji(total.category), fontSize = 18.sp)
                                     }
                                     Spacer(modifier = Modifier.width(12.dp))
-                                    Text(
-                                        if (isBengali) category?.nameBn ?: getCategoryName(total.category, true) else total.category,
-                                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
-                                    )
+                                    Column {
+                                        Text(
+                                            if (isBengali) category?.nameBn ?: CategoryUtils.getCategoryName(total.category, true) else total.category,
+                                            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                                        )
+                                        if (hasBudget) {
+                                            Text(
+                                                if (isBengali) "বাজেট: $currency ${total.budget}" else "Budget: $currency ${total.budget}",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                                            )
+                                        }
+                                    }
                                 }
-                                Text(
-                                    "$currency ${"%.2f".format(total.totalAmount)}",
-                                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.ExtraBold)
-                                )
+                                Column(horizontalAlignment = Alignment.End) {
+                                    Text(
+                                        "$currency ${"%.2f".format(total.totalAmount)}",
+                                        style = MaterialTheme.typography.titleMedium.copy(
+                                            fontWeight = FontWeight.ExtraBold,
+                                            color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+                                        )
+                                    )
+                                    if (hasBudget) {
+                                        val remaining = total.budget - total.totalAmount
+                                        Text(
+                                            if (isBengali) {
+                                                if (remaining >= 0) "বাকি: $currency ${"%.0f".format(remaining)}" else "বাজেট ছাড়িয়েছে!"
+                                            } else {
+                                                if (remaining >= 0) "Left: $currency ${"%.0f".format(remaining)}" else "Over Budget!"
+                                            },
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = if (isOverBudget) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.outline
+                                        )
+                                    }
+                                }
                             }
 
                             Spacer(modifier = Modifier.height(12.dp))
@@ -264,10 +297,11 @@ fun SummaryScreen(
                                         .fillMaxHeight()
                                         .background(
                                             brush = Brush.horizontalGradient(
-                                                colors = listOf(
-                                                    MaterialTheme.colorScheme.primary,
-                                                    MaterialTheme.colorScheme.secondary
-                                                )
+                                                colors = if (isOverBudget) {
+                                                    listOf(MaterialTheme.colorScheme.error, MaterialTheme.colorScheme.errorContainer)
+                                                } else {
+                                                    listOf(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.secondary)
+                                                }
                                             )
                                         )
                                 )
@@ -275,10 +309,13 @@ fun SummaryScreen(
 
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = if (isBengali)
-                                    "মোট মাসিক বাজেটের ${(percentage * 100).toInt()}%"
-                                else
-                                    "${(percentage * 100).toInt()}% of total monthly budget",
+                                text = if (hasBudget) {
+                                    if (isBengali) "বাজেটের ${( (total.totalAmount/total.budget) * 100).toInt()}%" 
+                                    else "${((total.totalAmount/total.budget) * 100).toInt()}% of budget"
+                                } else {
+                                    if (isBengali) "মোট খরচের ${(percentage * 100).toInt()}%" 
+                                    else "${(percentage * 100).toInt()}% of total spend"
+                                },
                                 style = MaterialTheme.typography.labelSmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.align(Alignment.End)

@@ -16,6 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.util.Calendar
 import java.util.Locale
@@ -176,9 +177,9 @@ class ExpenseViewModel(
         }
     }
 
-    fun addCategory(name: String, nameBn: String, icon: String, color: Int) {
+    fun addCategory(name: String, nameBn: String, icon: String, color: Int, budget: Double = 0.0) {
         viewModelScope.launch {
-            repository.addCategory(CategoryEntity(name = name, nameBn = nameBn, icon = icon, color = color))
+            repository.addCategory(CategoryEntity(name = name, nameBn = nameBn, icon = icon, color = color, budget = budget))
         }
     }
 
@@ -360,6 +361,13 @@ class ExpenseViewModel(
     fun updateExpense(expense: ExpenseEntity) {
         viewModelScope.launch {
             repository.updateExpense(expense)
+        }
+    }
+
+    fun exportExpenses(context: android.content.Context) {
+        viewModelScope.launch {
+            val allExpenses = repository.getExpenses().first()
+            com.mihab.expensetracker.util.CsvExporter.exportExpensesToCsv(context, allExpenses)
         }
     }
 

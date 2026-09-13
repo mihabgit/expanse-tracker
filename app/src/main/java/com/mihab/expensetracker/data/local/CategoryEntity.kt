@@ -11,5 +11,6 @@ data class CategoryEntity(
     val nameBn: String,
     val icon: String,
     val color: Int = 0xFF6200EE.toInt(),
-    val isDefault: Boolean = false
+    val isDefault: Boolean = false,
+    val budget: Double = 0.0
 )

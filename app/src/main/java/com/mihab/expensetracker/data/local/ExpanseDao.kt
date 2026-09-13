@@ -54,9 +54,11 @@ interface ExpenseDao {
     fun getMonthlyTotal(month: String): Flow<Double?>
 
     @Query("""
-        SELECT category, SUM(amount) as totalAmount FROM expenses 
-        WHERE date >= :startTime AND date <= :endTime
-        GROUP BY category
+        SELECT e.category, SUM(e.amount) as totalAmount, COALESCE(c.budget, 0.0) as budget
+        FROM expenses e
+        LEFT JOIN categories c ON e.category = c.name OR e.category = c.nameBn
+        WHERE e.date >= :startTime AND e.date <= :endTime
+        GROUP BY e.category
     """)
     fun getCategoryTotalsByTimeRange(startTime: Long, endTime: Long): Flow<List<CategoryTotal>>
 
@@ -78,5 +80,6 @@ interface ExpenseDao {
 
 data class CategoryTotal(
     val category: String,
-    val totalAmount: Double
+    val totalAmount: Double,
+    val budget: Double = 0.0
 )

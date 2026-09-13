@@ -127,6 +127,7 @@ fun AppNavHost(
         }
 
         composable(Screen.Settings.route) {
+            val context = LocalContext.current
             SettingsScreen(
                 onBackClick = {
                     navController.popBackStack()
@@ -145,7 +146,10 @@ fun AppNavHost(
                 themeMode = themeMode,
                 onThemeChanged = onThemeChanged,
                 showBKashCard = showBKashCard,
-                onBKashCardToggle = onBKashCardToggle
+                onBKashCardToggle = onBKashCardToggle,
+                onExportClick = {
+                    viewModel.exportExpenses(context)
+                }
             )
         }
 

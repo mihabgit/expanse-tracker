@@ -83,8 +83,8 @@ fun ManageCategoriesScreen(
         if (showAddDialog) {
             CategoryDialog(
                 onDismiss = { showAddDialog = false },
-                onSave = { name, nameBn, icon, color ->
-                    viewModel.addCategory(name, nameBn, icon, color)
+                onSave = { name, nameBn, icon, color, budget ->
+                    viewModel.addCategory(name, nameBn, icon, color, budget)
                     showAddDialog = false
                 },
                 isBengali = isBengali
@@ -95,12 +95,13 @@ fun ManageCategoriesScreen(
             CategoryDialog(
                 category = editingCategory,
                 onDismiss = { editingCategory = null },
-                onSave = { name, nameBn, icon, color ->
+                onSave = { name, nameBn, icon, color, budget ->
                     viewModel.updateCategory(editingCategory!!.copy(
                         name = name,
                         nameBn = nameBn,
                         icon = icon,
-                        color = color
+                        color = color,
+                        budget = budget
                     ))
                     editingCategory = null
                 },
@@ -155,6 +156,13 @@ fun CategoryItem(
                             color = MaterialTheme.colorScheme.outline
                         )
                     }
+                    if (category.budget > 0) {
+                        Text(
+                            if (isBengali) "বাজেট: ৳${category.budget}" else "Budget: $${category.budget}",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 }
             }
             Row {
@@ -174,13 +182,14 @@ fun CategoryItem(
 fun CategoryDialog(
     category: CategoryEntity? = null,
     onDismiss: () -> Unit,
-    onSave: (String, String, String, Int) -> Unit,
+    onSave: (String, String, String, Int, Double) -> Unit,
     isBengali: Boolean
 ) {
     var name by remember { mutableStateOf(category?.name ?: "") }
     var nameBn by remember { mutableStateOf(category?.nameBn ?: "") }
     var icon by remember { mutableStateOf(category?.icon ?: "💰") }
     var color by remember { mutableStateOf(category?.color ?: 0xFF6200EE.toInt()) }
+    var budget by remember { mutableStateOf(category?.budget?.toString() ?: "") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -205,14 +214,19 @@ fun CategoryDialog(
                     label = { Text(if (isBengali) "নাম (বাংলা)" else "Name (Bengali)") },
                     modifier = Modifier.fillMaxWidth()
                 )
-                // In a real app, you might want a color picker here. 
-                // For now, let's just use a simple text field or a few color options.
+                OutlinedTextField(
+                    value = budget,
+                    onValueChange = { budget = it },
+                    label = { Text(if (isBengali) "বাজেট" else "Monthly Budget") },
+                    modifier = Modifier.fillMaxWidth(),
+                    keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = androidx.compose.ui.text.input.KeyboardType.Number)
+                )
             }
         },
         confirmButton = {
             Button(
                 onClick = {
-                    onSave(name, nameBn, icon, color)
+                    onSave(name, nameBn, icon, color, budget.toDoubleOrNull() ?: 0.0)
                 },
                 enabled = name.isNotBlank() && nameBn.isNotBlank() && icon.isNotBlank()
             ) {
