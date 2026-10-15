@@ -15,9 +15,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -108,6 +106,58 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
             item { Spacer(modifier = Modifier.height(8.dp)) }
+
+            // Polite Widget Tip Banner (shown if user has added >= 3 expenses and not dismissed)
+            item {
+                val prefs = context.getSharedPreferences("expense_tracker_prefs", android.content.Context.MODE_PRIVATE)
+                var showWidgetBanner by remember { mutableStateOf(!prefs.getBoolean("widget_banner_dismissed", false)) }
+                val expenses by viewModel.expenses.collectAsState()
+
+                if (showWidgetBanner && expenses.size >= 3) {
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.6f)
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = if (isBengali) "💡 হোম স্ক্রিন উইজেট ট্রাই করুন!" else "💡 Try the Home Screen Widget!",
+                                    style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                    color = MaterialTheme.colorScheme.secondary
+                                )
+                                TextButton(onClick = {
+                                    showWidgetBanner = false
+                                    prefs.edit().putBoolean("widget_banner_dismissed", true).apply()
+                                }) {
+                                    Text(if (isBengali) "বাদ দিন" else "Dismiss", style = MaterialTheme.typography.labelSmall)
+                                }
+                            }
+                            Text(
+                                text = if (isBengali) "অ্যাপ ওপেন না করেই হোম স্ক্রিন থেকে আজকের খরচ দেখতে উইজেট পিন করুন।" else "Pin our widget to view your daily and monthly spending instantly without opening the app.",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Button(
+                                onClick = {
+                                    com.mihab.expensetracker.util.WidgetHelper.requestPinWidget(context)
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                Text(if (isBengali) "উইজেট পিন করুন" else "Pin Widget Now")
+                            }
+                        }
+                    }
+                }
+            }
 
             // Today's Total 💰 (Hero Section)
             item {

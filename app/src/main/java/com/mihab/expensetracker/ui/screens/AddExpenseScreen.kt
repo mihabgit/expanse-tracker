@@ -27,6 +27,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.mihab.expensetracker.data.local.ExpenseEntity
+import com.mihab.expensetracker.util.InAppReviewHelper
 import com.mihab.expensetracker.util.LocaleHelper
 import com.mihab.expensetracker.viewmodel.ExpenseViewModel
 import java.text.SimpleDateFormat
@@ -312,6 +313,7 @@ fun AddExpenseScreen(
                                 date = selectedDate
                             ))
                         } else {
+                            InAppReviewHelper.checkAndRequestReview(context)
                             onSave(parsedAmount, selectedCategory, note.ifBlank { null }, selectedDate)
                         }
                     }

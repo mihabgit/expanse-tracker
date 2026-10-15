@@ -17,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.mihab.expensetracker.util.LocaleHelper
 import java.util.Locale
 
@@ -303,6 +304,43 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
+                if (isBengali) "হোম স্ক্রিন উইজেট" else "Home Screen Widget",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
+            Card(
+                onClick = {
+                    com.mihab.expensetracker.util.WidgetHelper.requestPinWidget(context)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            if (isBengali) "উইজেট হোম স্ক্রিনে পিন করুন" else "Add Widget to Home Screen",
+                            style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Bold),
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        Text(
+                            if (isBengali) "হোম স্ক্রিন থেকেই খরচের হিসাব দেখুন" else "View spending totals right from your home screen",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.Gray
+                        )
+                    }
+                    Text("📌", fontSize = 24.sp)
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
                 if (isBengali) "ডেটা এক্সপোর্ট করুন" else "Export Data",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
@@ -325,6 +363,35 @@ fun SettingsScreen(
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Text("📊")
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(
+                if (isBengali) "অ্যাপ রেট করুন" else "Rate App",
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+            )
+
+            Card(
+                onClick = {
+                    com.mihab.expensetracker.util.InAppReviewHelper.requestReviewManually(context)
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        if (isBengali) "প্লে স্টোরে রেটিং দিন" else "Rate us on Play Store",
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text("⭐")
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
