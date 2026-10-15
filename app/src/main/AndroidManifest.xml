@@ -14,6 +14,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ExpenseTracker">
+
+        <!-- Sample AdMob App ID: ca-app-pub-3940256099942544~3343010191 -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-7459846649291784~3129445348" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

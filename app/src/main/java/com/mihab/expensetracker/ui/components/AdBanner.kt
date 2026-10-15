@@ -1,27 +1,24 @@
 package com.mihab.expensetracker.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import com.google.android.gms.ads.AdRequest
+import com.google.android.gms.ads.AdSize
+import com.google.android.gms.ads.AdView
 
 @Composable
 fun AdBanner(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .background(Color.LightGray.copy(alpha = 0.3f)),
-        contentAlignment = Alignment.Center
-    ) {
-        Text("Ad Banner Space 🖼️", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
-    }
+    AndroidView(
+        modifier = modifier.fillMaxWidth(),
+        factory = { context ->
+            AdView(context).apply {
+                setAdSize(AdSize.BANNER)
+                // Real banner ad unit ID
+                adUnitId = "ca-app-pub-7459846649291784/9490452522"
+                loadAd(AdRequest.Builder().build())
+            }
+        }
+    )
 }

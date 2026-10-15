@@ -43,6 +43,9 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         LocaleHelper.onAttach(this)
         
+        // Initialize Google Mobile Ads SDK
+        com.google.android.gms.ads.MobileAds.initialize(this) {}
+
         checkNotificationPermission()
         scheduleNotifications()
 

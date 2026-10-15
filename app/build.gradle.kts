@@ -12,8 +12,8 @@ android {
         applicationId = "com.mihab.expensetracker"
         minSdk = 24
         targetSdk = 37
-        versionCode = 7
-        versionName = "1.0.7"
+        versionCode = 8
+        versionName = "1.0.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -83,4 +83,7 @@ dependencies {
     // Jetpack Glance Widget
     implementation("androidx.glance:glance-appwidget:1.2.0")
     implementation("androidx.glance:glance-material3:1.2.0")
+
+    // Google AdMob
+    implementation("com.google.android.gms:play-services-ads:23.6.0")
 }

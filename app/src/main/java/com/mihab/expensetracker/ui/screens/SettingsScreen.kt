@@ -18,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.mihab.expensetracker.ui.components.AdBanner
 import com.mihab.expensetracker.util.LocaleHelper
 import java.util.Locale
 
@@ -61,7 +62,7 @@ fun SettingsScreen(
             )
         },
         bottomBar = {
-            //AdBanner()
+            AdBanner()
         }
     ) { padding ->
         val scrollState = rememberScrollState()
